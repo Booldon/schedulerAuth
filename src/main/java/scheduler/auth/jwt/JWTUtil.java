@@ -4,6 +4,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -83,6 +84,16 @@ public class JWTUtil {
                 .signWith(secretKey)
                 .compact();
 
+    }
+
+    public ResponseCookie generateTokenCookie(String token) {
+
+        return ResponseCookie.from("Authorization",token)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite(org.springframework.boot.web.server.Cookie.SameSite.NONE.attributeValue())
+                .build();
     }
 
 }

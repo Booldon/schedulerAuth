@@ -85,20 +85,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(username, role);
 
         //jwt 생성
-        String token = jwtUtil.createJwt(username, role, refreshToken.getRandomKey(), 60*60*60*60L);
-        ResponseCookie responseCookie = generateTokenCookie(token);
+        String token = jwtUtil.createJwt(username, role, refreshToken.getRandomKey(), 15*1000L);
+        ResponseCookie responseCookie = jwtUtil.generateTokenCookie(token);
         response.addHeader(HttpHeaders.SET_COOKIE,responseCookie.toString());
 //        response.sendRedirect("http://localhost:3000");
 
-    }
-
-    private ResponseCookie generateTokenCookie(String token) {
-        return ResponseCookie.from("Authorization",token)
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite(Cookie.SameSite.NONE.attributeValue())
-                .build();
     }
 
     @Override

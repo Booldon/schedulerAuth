@@ -93,14 +93,12 @@ public class SecurityConfig {
         http
                 .httpBasic((auth) -> auth.disable());
 
-        http
-                .addFilterAfter(new JWTFilter(jwtUtil,refreshTokenService), LoginFilter.class);
-
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("**").permitAll()
-//                        .anyRequest().authenticated()
+                        .requestMatchers("/users").hasRole("USER")
+                        .anyRequest().authenticated()
                 ); //로그인한 사용자만 가능
 
 
@@ -109,6 +107,8 @@ public class SecurityConfig {
         http
                 .oauth2Login((oauth2) -> oauth2
                         .loginPage("/auth/login/oauth2")
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/auth/login/oauth2/authorization"))
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler));
@@ -120,6 +120,9 @@ public class SecurityConfig {
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenService),
                         UsernamePasswordAuthenticationFilter.class);
+
+        http
+                .addFilterAfter(new JWTFilter(jwtUtil,refreshTokenService), LoginFilter.class);
 
         //세션 설정 : STATELESS - JWT를 통한 인증
         http

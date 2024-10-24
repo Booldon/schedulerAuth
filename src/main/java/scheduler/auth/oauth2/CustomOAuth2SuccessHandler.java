@@ -39,7 +39,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         CustomOAuth2user customUserDetails = (CustomOAuth2user) authentication.getPrincipal();
 
         String username = customUserDetails.getUsername();
-        System.out.println("++authentication.authentication++" + authentication);
+        System.out.println("++:.authentication++" + authentication);
         System.out.println("++authentication.username++" + username);
 
 
@@ -58,18 +58,10 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String token = jwtUtil.createJwt(username, role, refreshToken.getRandomKey(), 60*60*60*60L);
 
 //        response.addCookie(createCookie("Authorization", token));
-        ResponseCookie responseCookie = generateTokenCookie(token);
+        ResponseCookie responseCookie = jwtUtil.generateTokenCookie(token);
         response.addHeader(HttpHeaders.SET_COOKIE,responseCookie.toString());
         response.sendRedirect("http://localhost:3000/");
 
     }
 
-    private ResponseCookie generateTokenCookie(String token) {
-        return ResponseCookie.from("Authorization",token)
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite(Cookie.SameSite.NONE.attributeValue())
-                .build();
-    }
 }

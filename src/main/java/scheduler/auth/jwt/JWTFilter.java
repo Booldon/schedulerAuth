@@ -5,8 +5,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import scheduler.auth.dto.CustomUserDetails;
@@ -15,6 +18,7 @@ import scheduler.auth.entity.User;
 import scheduler.auth.service.RefreshTokenService;
 
 import java.io.IOException;
+import java.util.Collection;
 
 public class JWTFilter extends OncePerRequestFilter {
 
@@ -93,38 +97,16 @@ public class JWTFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                System.out.println("create JWT By RefreshToken");
 
-                System.out.println("create JWT");
-
-                String randomkey = refreshToken.getRandomKey();
-
-                //JWT 생성
-                String newToken = jwtUtil.createJwt(refreshToken.getUsername(), refreshToken.getRole(), randomkey,15*1000L);
-
+                //JWT 생성,교체
+                token = jwtUtil.createJwt(refreshToken.getUsername(), refreshToken.getRole(), refreshToken.getRandomKey(),15*1000L);
+                ResponseCookie responseCookie = jwtUtil.generateTokenCookie(token);
+                response.addHeader(HttpHeaders.SET_COOKIE,responseCookie.toString());
+                
                 //refreshToken 재생성
                 //refreshTokenService.createRefreshToken(refreshToken.getUsername(),refreshToken.getRole());
-
-                //헤더 추가
-                response.addHeader("Authorization", "Bearer " + newToken);
-                //User를 생성하여 값 set
-                User userEntity = new User();
-                userEntity.setUsername(refreshToken.getUsername());
-                userEntity.setPassword("temppassword"); //임의의 값 지정
-                userEntity.setRole(refreshToken.getRole());
-
-                //UserDetails에 회원 정보 객체에 담기
-                CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
-
-                //스프링 시큐리티 인증 토큰 생성
-                Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-
-                //세션에 사용자 등록
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("Base RefreshToken");
-
-                filterChain.doFilter(request, response);
-
-                return;
+                //if절 종료후 SecurityContext에 담는 로직
             }
 
             else { //RefreshToken이 존재하지 않으면
@@ -142,29 +124,29 @@ public class JWTFilter extends OncePerRequestFilter {
         //userEntity를 생성하여 값 set
         User userEntity = new User();
         userEntity.setUsername(username);
+        userEntity.setEmail("test@test1.com");
         userEntity.setPassword("temppassword"); //임의의 값 지정
         userEntity.setRole(role);
 
         //UserDetails에 회원 정보 객체에 담기
         CustomUserDetails customUserDetails = new CustomUserDetails(userEntity);
+        // 사용자 객체에서 권한을 가져옴
+        Collection<? extends GrantedAuthority> authorities = customUserDetails.getAuthorities();
+
+        // 각 권한을 출력해보는 예시
+        for (GrantedAuthority authority : authorities) {
+            System.out.println("customUserDetails.getAuthorities() : " + authority.getAuthority()); // 이때 getAuthority()가 호출됨
+        }
 
         //스프링 시큐리티 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-
-//        //userDTO를 생성하여 값 set
-//        UserDTO userDTO = new UserDTO();
-//        userDTO.setUsername(username);
-//        userDTO.setRole(role);
-//
-//        //UserDetails에 회원 정보 객체 담기
-//        CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
-//
-//        //스프링 시큐리티 인증 토큰 생성
-//        Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+        System.out.println("AuthToken : " + authToken);
 
         //세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
-        System.out.println("Base LoginInfo");
+        System.out.println("SecurityContextHolder: " + SecurityContextHolder.getContext().getAuthentication());
+        System.out.println("SecurityContextHolder Strategy: " + SecurityContextHolder.getContextHolderStrategy());
+
 
         filterChain.doFilter(request, response);
 
