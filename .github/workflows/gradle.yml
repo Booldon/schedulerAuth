@@ -48,3 +48,24 @@ jobs:
       run: |
         chmod +x ./gradlew
         ./gradlew bootJar
+
+
+    ## 웹 이미지 빌드 및 도커허브에 push
+    - name: web docker build and push
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -t ${{ secrets.DOCKER_REPO }}/scheduler-auth .
+        docker push ${{ secrets.DOCKER_REPO }}/scheduler-auth
+        
+    ## docker compose up
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ubuntu
+        key: ${{ secrets.KEY }}
+        script: |
+          sudo docker rm -f $(sudo docker ps -qa)
+          sudo docker pull ${{ secrets.DOCKER_REPO }}/scheduler-auth
+          sudo docker-compose -f scheduler/docker-compose-ec2.yml up -d
+          sudo docker image prune -f
