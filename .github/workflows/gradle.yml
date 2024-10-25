@@ -14,6 +14,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env: # docker가 실행할 애플리케이션의 yml 설정 파일 환경변수를 env로 설정하며, 실제 값은 Github 레포 secrets에서 가져옴. 
+      SPRING_DATASOURCE_URL: ${{secrets.SPRING_DATASOURCE_URL}}
+      SPRING_DATASOURCE_USERNAME: ${{secrets.SPRING_DATASOURCE_USERNAME}}
+      SPRING_DATASOURCE_PASSWORD: ${{secrets.SPRING_DATASOURCE_PASSWORD}}
+      JWT_SECRET: ${{secrets.JWT_SECRET}}
+      NAVER_CLIENT_ID: ${{secrets.NAVER_CLIENT_ID}}
+      NAVER_REDIRECT_URI: ${{secrets.NAVER_REDIRECT_URI}}
+      GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+      GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
+      GOOGLE_REDIRECT_URI: ${{secrets.GOOGLE_REDIRECT_URI}}
+      working-directory: ./be/stackoverflow-be
+      
     permissions:
       contents: read
       packages: write
@@ -31,16 +44,16 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     ## create application-database.yml
-    - name: create application.yml
+    - name: create application.properties
       run: |        
-        ## create application.yml
+        ## create application.properties
         cd ./src/main/resources
 
         ## properties 파일 생성
-        touch ./application.yml
+        touch ./application.properties
 
-        ## GitHub-Actions 에서 설정한 값을 application.yml 파일에 쓰기
-        echo "${{ secrets.APPLICATION_YML }}" >> ./application.yml
+        ## GitHub-Actions 에서 설정한 값을 application.properties 파일에 쓰기
+        echo "${{ secrets.PROPERTIES }}" >> ./application.properties
 
       shell: bash
 
@@ -54,6 +67,16 @@ jobs:
     - name: web docker build and push
       run: |
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build --build-arg SPRING_DATASOURCE_URL="${{env.SPRING_DATASOURCE_URL}}" \
+          --build-arg SPRING_DATASOURCE_USERNAME="${{env.SPRING_DATASOURCE_USERNAME}}" \
+          --build-arg SPRING_DATASOURCE_PASSWORD="${{env.SPRING_DATASOURCE_PASSWORD}}" \
+          --build-arg JWT_SECRET="${{env.JWT_SECRET}}" \
+          --build-arg NAVER_CLIENT_ID="${{env.NAVER_CLIENT_ID}}" \
+          --build-arg NAVER_CLIENT_SECRET="${{env.NAVER_CLIENT_SECRET}}" \
+          --build-arg NAVER_REDIRECT_URI="${{env.NAVER_REDIRECT_URI}}" \
+          --build-arg GOOGLE_CLIENT_ID="${{env.GOOGLE_CLIENT_ID}}" \
+          --build-arg GOOGLE_CLIENT_SECRET="${{env.GOOGLE_CLIENT_SECRET}}" \
+          --build-arg GOOGLE_REDIRECT_URI="${{env.GOOGLE_REDIRECT_URI}}"
         docker build -t ${{ secrets.DOCKER_REPO }}/scheduler-auth .
         docker push ${{ secrets.DOCKER_REPO }}/scheduler-auth
         
