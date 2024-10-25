@@ -31,16 +31,16 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     ## create application-database.yml
-    - name: create application.properties
+    - name: create application.yml
       run: |        
-        ## create application.properties
+        ## create application.yml
         cd ./src/main/resources
 
         ## properties 파일 생성
-        touch ./application.properties
+        touch ./application.yml
 
-        ## GitHub-Actions 에서 설정한 값을 application.properties 파일에 쓰기
-        echo "${{ secrets.PROPERTIES }}" >> ./application.properties
+        ## GitHub-Actions 에서 설정한 값을 application.yml 파일에 쓰기
+        echo "${{ secrets.APPLICATION_YML }}" >> ./application.yml
 
       shell: bash
 
