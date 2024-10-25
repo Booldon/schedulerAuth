@@ -65,7 +65,7 @@ jobs:
         username: ubuntu
         key: ${{ secrets.KEY }}
         script: |
-          sudo docker rm -f $(sudo docker ps -qa)
+          sudo docker rm -f $(sudo docker ps -qa --filter "name=auth")
           sudo docker pull ${{ secrets.DOCKER_REPO }}/scheduler-auth
-          sudo docker-compose -f scheduler/docker-compose-ec2.yml up -d
+          sudo docker-compose -f scheduler/docker-compose-auth.yml up -d
           sudo docker image prune -f
