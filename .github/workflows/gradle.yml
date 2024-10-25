@@ -77,7 +77,7 @@ jobs:
           --build-arg GOOGLE_CLIENT_ID="${{env.GOOGLE_CLIENT_ID}}" \
           --build-arg GOOGLE_CLIENT_SECRET="${{env.GOOGLE_CLIENT_SECRET}}" \
           --build-arg GOOGLE_REDIRECT_URI="${{env.GOOGLE_REDIRECT_URI}}"
-        docker build -t ${{ secrets.DOCKER_REPO }}/scheduler-auth .
+          -t ${{ secrets.DOCKER_REPO }}/scheduler-auth .
         docker push ${{ secrets.DOCKER_REPO }}/scheduler-auth
         
     ## docker compose up
