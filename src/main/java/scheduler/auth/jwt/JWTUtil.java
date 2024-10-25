@@ -91,7 +91,7 @@ public class JWTUtil {
         return ResponseCookie.from("Authorization",token)
                 .path("/")
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .sameSite(org.springframework.boot.web.server.Cookie.SameSite.NONE.attributeValue())
                 .build();
     }
