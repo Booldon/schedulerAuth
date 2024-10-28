@@ -3,6 +3,7 @@ package scheduler.auth.config;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -96,8 +97,8 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("**").permitAll()
-                        .requestMatchers("/users").hasRole("USER")
+                        .requestMatchers("/login","/error","/join").permitAll()
+                        .requestMatchers("/users/**").hasRole("USER")
                         .anyRequest().authenticated()
                 ); //로그인한 사용자만 가능
 
@@ -106,9 +107,6 @@ public class SecurityConfig {
         //oauth2 경로로 오면 이것이 동작함
         http
                 .oauth2Login((oauth2) -> oauth2
-                        .loginPage("/auth/login/oauth2")
-                        .authorizationEndpoint(authorization -> authorization
-                                .baseUri("/auth/login/oauth2/authorization"))
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler));
