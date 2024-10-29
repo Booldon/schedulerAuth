@@ -26,4 +26,14 @@ public class RefreshToken {
     public void setLimitTime() {
         this.limitTime = new Date(System.currentTimeMillis() + 60*60*1000*24);
     }
+
+    public Boolean validateRamdomKey(String randomKey) {
+
+        if(this.randomKey.equals(randomKey)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }

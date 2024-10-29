@@ -97,7 +97,7 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/error","/join").permitAll()
+                        .requestMatchers("/login","/error","/join","/auth/refresh").permitAll()
                         .requestMatchers("/users/**").hasRole("USER")
                         .anyRequest().authenticated()
                 ); //로그인한 사용자만 가능
@@ -119,8 +119,8 @@ public class SecurityConfig {
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenService),
                         UsernamePasswordAuthenticationFilter.class);
 
-        http
-                .addFilterAfter(new JWTFilter(jwtUtil,refreshTokenService), LoginFilter.class);
+//        http
+//                .addFilterAfter(new JWTFilter(jwtUtil,refreshTokenService), LoginFilter.class);
 
         //세션 설정 : STATELESS - JWT를 통한 인증
         http

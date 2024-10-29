@@ -90,7 +90,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 }
 
                 if(!refreshToken.getRandomKey().equals(jwtUtil.getRandomKey(token))){ //randomkey matching
-                    System.out.println("randomkey dosen't matching");
+                    System.out.println("randomkey doesn't matching");
 
                     filterChain.doFilter(request, response);
                     //조건이 해당 되면 메소드 종료
@@ -99,13 +99,15 @@ public class JWTFilter extends OncePerRequestFilter {
 
                 System.out.println("create JWT By RefreshToken");
 
+                //refreshToken 재생성, 교체
+                refreshToken = refreshTokenService.createRefreshToken(refreshToken.getUsername(),refreshToken.getRole());
+
                 //JWT 생성,교체
                 token = jwtUtil.createJwt(refreshToken.getUsername(), refreshToken.getRole(), refreshToken.getRandomKey(),15*1000L);
                 ResponseCookie responseCookie = jwtUtil.generateTokenCookie(token);
                 response.addHeader(HttpHeaders.SET_COOKIE,responseCookie.toString());
                 
-                //refreshToken 재생성
-                //refreshTokenService.createRefreshToken(refreshToken.getUsername(),refreshToken.getRole());
+
                 //if절 종료후 SecurityContext에 담는 로직
             }
 
