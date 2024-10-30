@@ -7,7 +7,7 @@ import scheduler.auth.dto.UserDTO;
 import scheduler.auth.service.JoinService;
 
 @RestController
-@RequestMapping("/auth/users")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class JoinController {
 

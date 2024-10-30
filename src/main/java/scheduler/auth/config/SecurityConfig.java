@@ -3,19 +3,16 @@ package scheduler.auth.config;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import scheduler.auth.jwt.JWTFilter;
 import scheduler.auth.jwt.JWTUtil;
 import scheduler.auth.jwt.LoginFilter;
 import scheduler.auth.oauth2.CustomOAuth2SuccessHandler;
@@ -97,7 +94,7 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/error","/join","/auth/refresh").permitAll()
+                        .requestMatchers("/login/**","/error","/auth/**").permitAll()
                         .requestMatchers("/users/**").hasRole("USER")
                         .anyRequest().authenticated()
                 ); //로그인한 사용자만 가능
@@ -111,6 +108,13 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler));
 
+        //로그아웃 설정
+        http
+                .logout((logout) -> logout
+                        .logoutSuccessUrl("/login")
+                        .addLogoutHandler(new CustomLogoutHandler(refreshTokenService, jwtUtil))
+                        .deleteCookies("JSESSIONID"));
+
         //일반 로그인
         //필터 추가(addFilterAt: 해당 필터 자리를 원하는 필터로 대체, addFilterBefore: 특정 필터 앞에 필터 생성)
         //필터 위치 설정 : 세션이 stateless 상태이기 때문에 한 개의 인증 요청이 완료 되면 securityContext 값은 초기화 된다.
@@ -118,9 +122,6 @@ public class SecurityConfig {
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenService),
                         UsernamePasswordAuthenticationFilter.class);
-
-//        http
-//                .addFilterAfter(new JWTFilter(jwtUtil,refreshTokenService), LoginFilter.class);
 
         //세션 설정 : STATELESS - JWT를 통한 인증
         http

@@ -46,9 +46,9 @@ public class RefreshTokenService {
         return refreshToken.isPresent();
     }
 
-    public void deleteRefreshToken(String username) {
+    public void deleteRefreshToken(String randomKey) {
         // findById를 사용하여 Optional<RefreshToken> 반환
-        Optional<RefreshToken> refreshTokenOptional = refreshTokenRepository.findById(username);
+        Optional<RefreshToken> refreshTokenOptional = refreshTokenRepository.findByRandomKey(randomKey);
         // 존재하는 경우, 해당 RefreshToken 삭제
         refreshTokenOptional.ifPresent(refreshToken -> refreshTokenRepository.delete(refreshToken));
     }
