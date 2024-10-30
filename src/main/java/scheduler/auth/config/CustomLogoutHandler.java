@@ -44,12 +44,8 @@ public class CustomLogoutHandler implements LogoutHandler {
 
         if(authorization != null) {
             String token = authorization;
-            String randomKey = jwtUtil.getRandomKey(token);
 
-
-            System.out.println(randomKey);
-            refreshTokenService.deleteRefreshToken(randomKey);
-
+            refreshTokenService.deleteRefreshToken(token);
         }
         System.out.println("XXX logoutHandler XXX");
     }

@@ -17,20 +17,20 @@ public class JoinService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public void joinProcess(UserDTO userDTO) {
+    public User joinProcess(UserDTO userDTO) {
 
         String username = userDTO.getUsername();
         String password = bCryptPasswordEncoder.encode(userDTO.getPassword());
 
-        Boolean isExist = userRepository.existsByUsername(username);
-
-        if(isExist) {
-            System.out.println("이미 존재 하는 유저입니다.");
-            return;
+        if(userRepository.existsByUsername(username)) {
+            //존재하면
+            return null;
         }
         // email, password, name순
         User newUser = new User(userDTO.getEmail(), password, username);
 
-        userRepository.save(newUser);
+        User user = userRepository.save(newUser);
+
+        return user;
     }
 }

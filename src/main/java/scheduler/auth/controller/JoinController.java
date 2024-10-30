@@ -1,9 +1,11 @@
 package scheduler.auth.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import scheduler.auth.dto.UserDTO;
+import scheduler.auth.entity.User;
 import scheduler.auth.service.JoinService;
 
 @RestController
@@ -14,10 +16,10 @@ public class JoinController {
     private final JoinService joinService;
 
     @PostMapping("/join")
-    public String joinProcess(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> joinProcess(@RequestBody UserDTO userDTO) {
 
-        joinService.joinProcess(userDTO);
+         User user = joinService.joinProcess(userDTO);
 
-        return "ok";
+        return ResponseEntity.ok().body(user.getUsername() + "join complete");
     }
 }
