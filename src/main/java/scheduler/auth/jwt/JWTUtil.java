@@ -4,6 +4,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.Cookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
@@ -94,7 +95,8 @@ public class JWTUtil {
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
-                .sameSite(org.springframework.boot.web.server.Cookie.SameSite.NONE.attributeValue())
+//                .sameSite(org.springframework.boot.web.server.Cookie.SameSite.NONE.attributeValue())
+//                .sameSite(Cookie.SameSite.LAX.attributeValue())
                 .build();
     }
 
